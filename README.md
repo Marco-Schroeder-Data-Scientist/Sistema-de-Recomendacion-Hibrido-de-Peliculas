@@ -1,6 +1,10 @@
 # Proyecto: Recomendador de Películas, Series y Anime
 
-**Autor:** Marco  
+## Demo en vivo
+Prueba el recomendador interactivo aquí:  
+[Abrir app en Streamlit Cloud](https://movie-recommendation-system-hybrid-app-znywwpw5eiat5bjjduciqv.streamlit.app/)
+
+**Autor:** Marco Schroeder Labrín
 **Fecha:** Febrero 2026  
 **Objetivo:** Construir un sistema de recomendación híbrido que combine filtrado colaborativo, basado en contenido y popularidad ponderada, utilizando datos reales de películas del dataset The Movies Dataset (Kaggle).
 
