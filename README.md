@@ -1,84 +1,148 @@
-# Proyecto: Recomendador de Películas, Series y Anime
+# Sistema de Recomendacion Hibrido de Peliculas
+
+![Python](https://img.shields.io/badge/Python-3.13%2B-blue)
+![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
+![Streamlit](https://img.shields.io/badge/Streamlit-deployed-brightgreen)
+![scikit-learn](https://img.shields.io/badge/scikit--learn-1.0%2B-blue)
 
 ## Demo en vivo
-Prueba el recomendador interactivo aquí:  
+Prueba el recomendador interactivo aqui:
 [Abrir app en Streamlit Cloud](https://movie-recommendation-system-hybrid-app-znywwpw5eiat5bjjduciqv.streamlit.app/)
 
-**Autor:** Marco Schroeder Labrín
-**Fecha:** Febrero 2026  
-**Objetivo:** Construir un sistema de recomendación híbrido que combine filtrado colaborativo, basado en contenido y popularidad ponderada, utilizando datos reales de películas del dataset The Movies Dataset (Kaggle).
+**Autor:** Marco Schroeder Labrin
+**Fecha:** Febrero 2026
+**Objetivo:** Construir un sistema de recomendacion hibrido que combine filtrado
+colaborativo, basado en contenido y popularidad ponderada, utilizando datos reales
+de The Movies Dataset (TMDB + MovieLens, Kaggle).
 
-## Tecnologías utilizadas
+---
+
+## Descripcion
+
+Proyecto end-to-end de recomendacion de peliculas que cubre todo el flujo:
+ETL y limpieza de datos reales complejos, EDA completo, feature engineering,
+modelado con multiples enfoques y despliegue de una aplicacion interactiva
+en Streamlit con 4 modos de recomendacion.
+
+---
+
+## Tecnologias utilizadas
+
 - Python 3.13
-- Librerías principales: pandas, numpy, scikit-learn, implicit (BPR), matplotlib, seaborn
-- Despliegue interactivo: Streamlit
+- pandas, numpy, scikit-learn
+- implicit (BPR — Bayesian Personalized Ranking)
+- matplotlib, seaborn
+- Streamlit (deploy interactivo)
 
-## Estructura del proyecto
-Recomendador-de-películas-series-anime/
-├── movies_metadata.csv           # Dataset principal (metadata de películas)
+---
+
+## Estructura del Proyecto
+
+```
+├── movies_metadata.csv           # Dataset principal (metadata de peliculas)
 ├── credits.csv                   # Cast y crew
-├── links_small.csv               # Mapeo movieId ↔ tmdbId
+├── links_small.csv               # Mapeo movieId <-> tmdbId
 ├── ratings_small.csv             # Calificaciones de usuarios (MovieLens)
-├── app.py                        # Aplicación interactiva en Streamlit
-├── recomendacion_contenido.ipynb # Notebook completo (ETL → EDA → Modelado → Recomendadores)
+├── app.py                        # Aplicacion interactiva en Streamlit
+├── recomendacion_contenido.ipynb # Notebook completo (ETL -> EDA -> Modelado)
 ├── df_content_final.pkl          # DataFrame procesado
 ├── bpr_model_final.pkl           # Modelo BPR entrenado
-├── user_map.pkl                  # Mapas de índices para collaborative
+├── user_map.pkl                  # Mapas de indices para collaborative filtering
 ├── item_map.pkl
 ├── inv_item_map.pkl
 ├── interactions.pkl
 └── README.md
-text## Flujo del proyecto
+```
 
-1. **ETL y limpieza**  
-   - Carga y tratamiento de nulos (imputación por mediana/moda/placeholders)  
-   - Conversión de tipos (fechas → datetime, categóricas → category, enteros nullable)  
-   - Parseo de columnas JSON-like (genres → lista de nombres)  
-   - Eliminación de duplicados por id y título+año  
+---
 
-2. **EDA**  
-   - Univariado: distribuciones, outliers (runtime > 400 min eliminados)  
-   - Bivariado: correlaciones Spearman, boxplots por género, tendencias temporales  
+## Flujo del Proyecto
 
-3. **Preparación**  
-   - Filtro conservador: solo Released, runtime 10–400 min, ≥5 votos  
-   - Score de popularidad ponderado (fórmula IMDb-like)  
+### 1. ETL y Limpieza
+- Carga de ~45k peliculas con tratamiento de nulos (imputacion por mediana/moda)
+- Conversion de tipos (fechas, categoricas, enteros nullable)
+- Parseo de columnas JSON-like (genres → lista de nombres)
+- Eliminacion de duplicados por id y titulo+año
 
-4. **Modelado**  
-   - **Popularidad ponderada** (baseline)  
-   - **Content-based** (TF-IDF sobre overview + géneros ×3 + tagline + título + director + top 3 actores)  
-   - **Híbrido content** (similitud coseno × score ponderado)  
-   - **Collaborative filtering** (implicit BPR – Bayesian Personalized Ranking)  
-     - Feedback implícito: rating ≥3.5 → confianza 1.0  
-     - Métricas implícitas de ranking (top-N coherente con gusto del usuario)
+### 2. EDA
+- Univariado: distribuciones, deteccion y tratamiento de outliers
+- Bivariado: correlaciones Spearman, boxplots por genero, tendencias temporales
+- Outliers eliminados: runtime > 400 min
 
-5. **Despliegue**  
-   - App interactiva en Streamlit:  
-     - Popularidad ponderada  
-     - Recomendaciones por título (content-based)  
-     - Recomendaciones personalizadas por userId (collaborative)  
-     - Híbrido (combinado)
+### 3. Preparacion y Feature Engineering
+- Filtro conservador: solo peliculas Released, runtime 10–400 min, >= 5 votos
+- Score de popularidad ponderado (formula IMDb-like)
+- Texto combinado para TF-IDF: overview + generos x3 + tagline + titulo +
+  director + top 3 actores
 
-## Resultados destacados
-- Dataset final filtrado: ~29.8k películas (después de limpieza y filtros)  
-- Subconjunto para content-based: ~9.1k películas con ≥50 votos  
-- Cobertura de cruce ratings-movieId: ~63% (suficiente para collaborative)  
-- Recomendaciones collaborative (BPR) para userId=1:  
-  - Top: Pulp Fiction, Shawshank Redemption, Forrest Gump, Star Wars, Back to the Future  
-  - Coherencia alta con películas ya calificadas por el usuario (clásicos 80s-90s, culto, aventura/sci-fi, crimen/thriller)
+### 4. Modelado
 
-## Próximos pasos / mejoras posibles
-- Incorporar keywords.csv para enriquecer content-based  
-- Agregar evaluación offline (NDCG@10, Precision@K) en collaborative  
-- Fine-tuning de hiperparámetros en BPR  
-- Visualización de pósters (poster_path) en la app Streamlit  
-- Deploy público (Streamlit Cloud o Hugging Face Spaces)
+| Modelo | Descripcion |
+|---|---|
+| Popularidad ponderada | Baseline — formula IMDb-like |
+| Content-based | TF-IDF + similitud coseno sobre metadata enriquecida |
+| Hibrido content | Similitud coseno x score ponderado |
+| Collaborative filtering | implicit BPR (factors=100, iterations=30) |
 
-## Cómo ejecutar localmente
-1. Clonar repositorio
-2. Crear entorno virtual: `python -m venv .venv`
-3. Activar: `.venv\Scripts\activate` (Windows)
-4. Instalar dependencias: `pip install -r requirements.txt`
-5. Ejecutar app: `streamlit run app.py`
+**Collaborative filtering — detalle:**
+- Feedback implicito: rating >= 3.5 → confianza 1.0
+- Algoritmo BPR (Bayesian Personalized Ranking) para metricas de ranking top-N
 
-¡Contribuciones y feedback bienvenidos!
+### 5. Despliegue
+App interactiva en Streamlit con 4 modos:
+- Popularidad ponderada (top peliculas generales)
+- Recomendaciones por titulo (content-based)
+- Recomendaciones personalizadas por userId (collaborative BPR)
+- Modo hibrido (combinado)
+
+---
+
+## Resultados
+
+- Dataset original: ~45k peliculas
+- Dataset final filtrado: ~29.8k peliculas (post-limpieza y filtros)
+- Subconjunto content-based: ~9.1k peliculas con >= 50 votos
+- Cobertura cruce ratings-movieId: ~63% (suficiente para collaborative filtering)
+
+**Validacion colaborativa — ejemplo userId=1:**
+Recomendaciones recibidas: Pulp Fiction, Shawshank Redemption, Forrest Gump,
+Star Wars, Back to the Future — alta coherencia con historial del usuario
+(clasicos 80s-90s, aventura/sci-fi, crimen/thriller).
+
+---
+
+## Proximos Pasos
+
+- Incorporar keywords.csv para enriquecer content-based
+- Agregar evaluacion offline formal (NDCG@10, Precision@K)
+- Fine-tuning de hiperparametros en BPR
+- Visualizacion de posters (poster_path) en la app Streamlit
+
+---
+
+## Como ejecutar localmente
+
+```bash
+# 1. Clonar repositorio
+git clone https://github.com/Marco-Schroeder-Data-Scientist/movie-recommendation-system-hybrid-streamlit
+
+# 2. Crear entorno virtual
+python -m venv .venv
+
+# 3. Activar entorno
+.venv\Scripts\activate        # Windows
+source .venv/bin/activate     # Linux/macOS
+
+# 4. Instalar dependencias
+pip install -r requirements.txt
+
+# 5. Ejecutar app
+streamlit run app.py
+```
+
+---
+
+## Licencia
+
+MIT License — libre para uso, modificacion y distribucion (atribucion apreciada).
+Pull requests y sugerencias son bienvenidos.
